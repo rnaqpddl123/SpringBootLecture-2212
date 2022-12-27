@@ -2,6 +2,7 @@ package com.mulcam.demo.controller;
 
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mulcam.demo.entiry.User;
 import com.mulcam.demo.service.UserService;
+import com.mulcam.demo.sssion.UserSession;
 
 @Controller
 @RequestMapping("/user")
 public class UserController {
+//	@Resource
+	@Autowired
+	private UserSession userSession;
 	
 	@Autowired
 	private UserService service;
@@ -26,6 +31,8 @@ public class UserController {
 	public String list(Model model) {
 		List<User> list = service.getList();
 		model.addAttribute("userList", list);
+		model.addAttribute("sessionUid", userSession.getUid());
+		model.addAttribute("sessionUname", userSession.getUname());
 		return "user/list";
 	}
 	
@@ -64,5 +71,61 @@ public class UserController {
 			System.out.println("패스워드 입력이 잘못되었습니다.");
 			return "redirect:/user/register";
 		}
+	}
+	
+	@GetMapping("/update/{uid}")
+	public String updateForm(@PathVariable String uid, Model model) {
+		User user = service.get(uid); 
+		model.addAttribute("user", user);
+		return "user/update";
+	}
+	
+	
+	@PostMapping("/update")
+	public String update(HttpServletRequest req) {
+		String uid = req.getParameter("uid").strip();
+		String uname = req.getParameter("uname").strip();
+		String email = req.getParameter("email").strip();
+		User u = new User(uid,uname,email);
+		service.update(u);
+		
+		return "redirect:/user/list";
+	}
+	
+	@GetMapping("/delete/{uid}")
+	public String delete(@PathVariable String uid) {
+		service.delete(uid);
+		return "redirect:/user/list";
+	}
+	
+	@GetMapping("/login")
+	public String loginform() {
+		return "user/login";
+	}
+	
+	@PostMapping("/login")
+	public String login(HttpServletRequest req, Model model) {
+		String uid = req.getParameter("uid").strip();
+		String pwd = req.getParameter("pwd").strip();
+		int result = service.login(uid,pwd);
+		switch (result) {
+		case UserService.CORRECT_LOGIN :
+//			model.addAttribute("sessionUid", userSession.getUid());
+//			model.addAttribute("sessionUname", userSession.getUname());
+			return "redirect:/user/list";
+		case UserService.WRONG_PASSWORD :
+			return "user/login";
+		case UserService.UID_NOT_EXIST :
+			return "redirect:/user/register";
+		default:
+			return "";
+		}
+	}
+	
+	@RequestMapping("/logout")
+	public String logout() {
+		userSession.setUid("");
+		userSession.setUname("");
+		return "redirect:/user/list";
 	}
 }

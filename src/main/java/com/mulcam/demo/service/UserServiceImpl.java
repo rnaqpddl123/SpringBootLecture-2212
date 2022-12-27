@@ -1,6 +1,9 @@
 package com.mulcam.demo.service;
 
+
 import java.util.List;
+
+import javax.annotation.Resource;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.mulcam.demo.dao.UserDao;
 import com.mulcam.demo.entiry.User;
+import com.mulcam.demo.sssion.UserSession;
 
 @Service
 public class UserServiceImpl implements UserService{
+	@Resource
+	private UserSession userSession;
 	
 	@Autowired
 	private UserDao userDao;
@@ -32,6 +38,39 @@ public class UserServiceImpl implements UserService{
 		String cryptedPwd = BCrypt.hashpw(u.getPwd(), BCrypt.gensalt());
 		u.setPwd(cryptedPwd);
 		userDao.insert(u);
+	}
+
+	@Override
+	public void update(User u) {
+		userDao.update(u);	
+	}
+
+	@Override
+	public void delete(String uid) {
+		userDao.delete(uid);
+	}
+
+	@Override
+	public int login(String uid, String pwd) {
+		try {
+			User u = userDao.get(uid);
+			
+			if (u.getUid() != null) {	// uid가 존재
+				if (BCrypt.checkpw(pwd, u.getPwd())) {		// 비밀번호 같은지 비교(암호화해서)
+					// 로그인을 했을때 session에 정보 저장
+					userSession.setUid(u.getUid());
+					userSession.setUname(u.getUname());
+					return UserService.CORRECT_LOGIN;
+				}
+				else {		
+					// 비밀번호가 틀림, 로그인페이지로 다시이동
+					return UserService.WRONG_PASSWORD;
+				}
+			} 	
+		} catch(Exception e) {
+			// uid가 없음
+		}
+		return UserService.UID_NOT_EXIST;
 	}
 
 }

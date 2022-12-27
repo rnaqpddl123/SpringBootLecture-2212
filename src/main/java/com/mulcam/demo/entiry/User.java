@@ -19,7 +19,11 @@ public class User {
 		this.regDate = regDate;
 		this.isDeleted = isDeleted;
 	}
-	
+	public User(String uid, String uname, String email) {
+		this.uid = uid;
+		this.uname = uname;
+		this.email = email;
+	}
 	public User(String uid, String pwd, String uname, String email) {
 		super();
 		this.uid = uid;
