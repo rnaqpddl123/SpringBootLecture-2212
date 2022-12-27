@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mulcam.demo.entiry.User;
 import com.mulcam.demo.service.UserService;
-import com.mulcam.demo.sssion.UserSession;
+import com.mulcam.demo.session.UserSession;
 
 @Controller
 @RequestMapping("/user")

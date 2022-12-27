@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.mulcam.demo.dao.UserDao;
 import com.mulcam.demo.entiry.User;
-import com.mulcam.demo.sssion.UserSession;
+import com.mulcam.demo.session.UserSession;
 
 @Service
 public class UserServiceImpl implements UserService{

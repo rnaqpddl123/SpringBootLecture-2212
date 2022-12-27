@@ -1,4 +1,4 @@
-package com.mulcam.demo.sssion;
+package com.mulcam.demo.session;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
