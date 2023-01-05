@@ -1,6 +1,7 @@
 package com.mulcam.demo.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,7 +9,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -61,6 +64,7 @@ public class FileController {
 	@Value("${spring.servlet.multipart.location}")
 	String uploadDir;
 	
+	// 다운로드, (display와 같은 역할도 가능함)
 	@GetMapping("/download")
 	public ResponseEntity<Resource> download(@ModelAttribute FileEntity fe) {
 		// 다운로드받을파일(첨부파일)이 존재하는 경로 설정
@@ -84,5 +88,24 @@ public class FileController {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	// 화면 출력
+	@GetMapping("/display")
+	public ResponseEntity<Resource> display(@RequestParam("fileName") String fileName) {
+		String path = "C:\\Temp\\Spring\\";
+		String folder = "";
+		Resource resource = new FileSystemResource(path + folder + fileName);
+		if(!resource.exists()) 
+			return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND);
+		HttpHeaders header = new HttpHeaders();
+		Path filePath = null;
+		try{
+			filePath = Paths.get(path + folder + fileName);
+			header.add("Content-type", Files.probeContentType(filePath));
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<Resource>(resource, header, HttpStatus.OK);
 	}
 }
