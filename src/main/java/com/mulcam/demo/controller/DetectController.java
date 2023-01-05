@@ -3,6 +3,7 @@ package com.mulcam.demo.controller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -16,8 +17,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
 
 @Controller
 @RequestMapping("/detect")
@@ -25,14 +29,20 @@ public class DetectController {
 	
 	@Value("${naver.accessId}")	private String accessId;
 	@Value("${naver.secretKey}") private String secretKey;
-
+	@Value("${spring.servlet.multipart.location}") private String uploadDir;
+	
 	@GetMapping("/naver")
-	public String naver(Model model)  throws Exception{
+	public String naverForm() {
+		return "/detect/naverForm";
+	}
+	
+	@PostMapping("/naver")
+	public String naver(MultipartFile upload, Model model)  throws Exception{
 		// https://api.ncloud-docs.com/docs/ai-naver-objectdetection-object 사이트 참고해서 만들었음
+		File uploadFile = new File(upload.getOriginalFilename());
+		upload.transferTo(uploadFile);		//uploadDir에 적어둔 주소에 파일 저장
 		
 		String apiURL = "https://naveropenapi.apigw.ntruss.com/vision-obj/v1/detect";	//객체 인식
-		File uploadFile = new File("c:/Temp/yolo-test.jpg");	//이미지 파일 경로
-		
 		URL url = new URL(apiURL);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setUseCaches(false);
@@ -60,7 +70,7 @@ public class DetectController {
         out.flush();
         
         // 실제 파일을 읽어서 전송
-        FileInputStream fis = new FileInputStream(uploadFile);
+        FileInputStream fis = new FileInputStream(uploadDir + "/" +uploadFile);
         byte[] buffer = new byte[4096];
         int bytesRead = -1;	 		
         while((bytesRead = fis.read(buffer)) != -1)		// 다읽으면 -1 즉, 다읽을때까지
@@ -84,10 +94,11 @@ public class DetectController {
         while ((line = br.readLine()) != null)
         	sb.append(line);
         br.close();
-        
         fileName = URLEncoder.encode(fileName, "utf-8");
+       
         model.addAttribute("fileName", fileName);
         model.addAttribute("jsonResult", sb.toString());
 		return "/detect/naverResult";
 	}
+	
 }
