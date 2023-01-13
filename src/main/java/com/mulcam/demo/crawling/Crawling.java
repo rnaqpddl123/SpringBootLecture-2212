@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,13 +83,13 @@ public class Crawling {
 	//Driver
 	private WebDriver driver;		//스태틱 제거
 	// Properties
-	private static final String WEB_DRIVER_ID = "webdriver.chrome.driver";
-	private static final String WEB_DRIVER_PATH = "/DevTools/chromedriver/chromedriver.exe";
+	@Value("${web.dirver.id") private String webDriverId;
+	@Value("${web.dirver.path") private String webDriverPath;
 	
 	
 	public List<FireStation> fireStation() throws Exception {
-		// Druver Setup
-		System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
+		// Driver Setup
+		System.setProperty(webDriverId, webDriverPath);
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("headless");
 		driver = new ChromeDriver();
